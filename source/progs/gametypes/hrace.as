@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 int numCheckpoints = 0;
 bool demoRecording = false;
-const int MAX_RECORDS = 50;
+const int MAX_RECORDS = 30;
 const int DISPLAY_RECORDS = 20;
 const int HUD_RECORDS = 3;
 
@@ -526,11 +526,6 @@ class Player
                 G_PrintMsg( this.client.getEnt(), "You can only save your prerace position on solid ground.\n" );
                 return false;
             }
-            if ( maxs.z < 40 )
-            {
-                G_PrintMsg( this.client.getEnt(), "You can't save your prerace position while crouched.\n" );
-                return false;
-            }
         }
 
         Position @position = this.savedPosition();
@@ -661,45 +656,7 @@ class Player
         }
 
         Entity @ent = this.client.getEnt();
-
         G_CenterPrintMsg( ent, str + "\n" + RACE_TimeDiffString( this.finishTime, this.bestFinishTime, true ) );
-
-
-        Client@[] specs = RACE_GetSpectators(this.client);
-        for ( uint i = 0; i < specs.length; i++ )
-        {
-          Player@ spec_player = @RACE_GetPlayer(specs[i]);
-          String line1 = "";
-          String line2 = "";
-
-          if ( this.hasTime )
-          {
-            line1 += "\u00A0   Current: " + RACE_TimeToString( this.finishTime ) + "   \u00A0";
-            line2 += "\u00A0           " + RACE_TimeDiffString(this.finishTime, this.bestFinishTime, true) + "           \u00A0";
-          } else {
-            line1 += "\u00A0   Current: " + RACE_TimeToString( this.finishTime ) + "   \u00A0";
-            line2 += "\u00A0           " + "                    " + "           \u00A0";
-          }
-
-          if ( spec_player.hasTime )
-          {
-            line1 = "\u00A0  Personal:    " + "          " + line1;
-            line2 = RACE_TimeDiffString(this.finishTime, spec_player.bestFinishTime, true) + "          " + line2;
-          } else if ( levelRecords[0].finishTime != 0 ) {
-            line1 = "\u00A0                                " + line1;
-            line2 = "\u00A0                                " + line2;
-          }
-
-          if ( levelRecords[0].finishTime != 0 )
-          {
-            line1 += "\u00A0          " + "Server:     \u00A0";
-            line2 += "\u00A0      " + RACE_TimeDiffString(this.finishTime, levelRecords[0].finishTime, true) + "\u00A0";
-          }
-
-          G_CenterPrintMsg(specs[i].getEnt(), line1 + "\n" + line2);
-        }
-
-        //G_CenterPrintMsg( ent, str + "\n" + RACE_TimeDiffString( this.finishTime, this.bestFinishTime, true ) );
         this.report.addCell( "Race finished:" );
         this.report.addCell( RACE_TimeToString( this.finishTime ) );
         this.report.addCell( "Personal:" );
@@ -730,12 +687,8 @@ class Player
                 if ( top == 0 )
                 {
                     this.client.addAward( S_COLOR_GREEN + "Server record!" );
-                    if ( levelRecords[0].finishTime == 0 )
-                      G_PrintMsg( null, this.client.name + S_COLOR_YELLOW + " set a new ^2livesow.net ^3record: "
-                              + S_COLOR_GREEN + RACE_TimeToString( this.finishTime ) + "\n" );
-                    else
-                      G_PrintMsg( null, this.client.name + S_COLOR_YELLOW + " set a new ^2livesow.net ^3record: "
-                              + S_COLOR_GREEN + RACE_TimeToString( this.finishTime ) + " " + S_COLOR_YELLOW + "[-" + RACE_TimeToString( levelRecords[0].finishTime - this.finishTime ) + "]\n" );
+                    G_PrintMsg( null, this.client.name + S_COLOR_YELLOW + " set a new server record: "
+                            + S_COLOR_WHITE + RACE_TimeToString( this.finishTime ) + "\n" );
                 }
 
                 int remove = MAX_RECORDS - 1;
@@ -835,45 +788,7 @@ class Player
         }
 
         Entity @ent = this.client.getEnt();
-
         G_CenterPrintMsg( ent, str + "\n" + RACE_TimeDiffString( this.sectorTimes[id], this.bestSectorTimes[id], true ) );
-
-
-        Client@[] specs = RACE_GetSpectators(this.client);
-        for ( uint i = 0; i < specs.length; i++ )
-        {
-          Player@ spec_player = @RACE_GetPlayer(specs[i]);
-          String line1 = "";
-          String line2 = "";
-
-          if ( this.hasTime && this.sectorTimes[id] != 0 )
-          {
-            line1 += "\u00A0   Current: " + RACE_TimeToString( this.sectorTimes[id] ) + "   \u00A0";
-            line2 += "\u00A0           " + RACE_TimeDiffString(this.sectorTimes[id], this.bestSectorTimes[id], true) + "           \u00A0";
-          } else {
-            line1 += "\u00A0   Current: " + RACE_TimeToString( this.sectorTimes[id] ) + "   \u00A0";
-            line2 += "\u00A0           " + "                    " + "           \u00A0";
-          }
-
-          if ( spec_player.hasTime && spec_player.bestSectorTimes[id] != 0 )
-          {
-            line1 = "\u00A0  Personal:    " + "          " + line1;
-            line2 = RACE_TimeDiffString(this.sectorTimes[id], spec_player.bestSectorTimes[id], true) + "          " + line2;
-          } else if ( levelRecords[0].finishTime != 0 ) {
-            line1 = "\u00A0                                " + line1;
-            line2 = "\u00A0                                " + line2;
-          }
-
-          if ( levelRecords[0].finishTime != 0 && levelRecords[0].sectorTimes[id] != 0 )
-          {
-            line1 += "\u00A0          " + "Server:     \u00A0";
-            line2 += "\u00A0      " + RACE_TimeDiffString(this.sectorTimes[id], levelRecords[0].sectorTimes[id], true) + "\u00A0";
-          }
-
-          G_CenterPrintMsg(specs[i].getEnt(), line1 + "\n" + line2);
-        }
-
-        //G_CenterPrintMsg( ent, str + "\n" + RACE_TimeDiffString( this.sectorTimes[id], this.bestSectorTimes[id], true ) );
         this.report.addCell( "Sector " + this.currentSector + ":" );
         this.report.addCell( RACE_TimeToString( this.sectorTimes[id] ) );
         this.report.addCell( "Personal:" );
@@ -1128,22 +1043,6 @@ void target_startTimer( Entity @ent )
 ///*****************************************************************
 /// LOCAL FUNCTIONS
 ///*****************************************************************
-
-Client@[] RACE_GetSpectators( Client@ client )
-{
-  Client@[] speclist;
-
-  for ( int i = 0; i < maxClients; i++ )
-  {
-    Client@ specClient = @G_GetClient(i);
-
-    if ( specClient.chaseActive && specClient.chaseTarget == client.getEnt().entNum )
-    {
-      speclist.push_back(@specClient);
-    }
-  }
-  return speclist;
-}
 
 String RACE_TimeToString( uint time )
 {
@@ -1496,6 +1395,8 @@ bool GT_Command( Client @client, const String &cmdString, const String &argsStri
               if ( !(player.inRace || player.postRace) )
                 return true;
             }
+
+            RS_ResetPjState( player.client.playerNum );
 
             if ( player.inRace )
                 player.cancelRace();
@@ -2192,18 +2093,6 @@ void GT_ThinkRules()
           int max_accel = int( ( sqrt( speed*speed + base_accel * ( 2 * base_speed - base_accel ) ) - speed ) / cgframeTime );
           client.setHUDStat( STAT_PROGRESS_SELF, max_accel );
         }
-
-    Entity @ent = @client.getEnt();
-        if ( ent.client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR )
-        {
-            if ( ent.health > ent.maxHealth ) {
-                ent.health -= ( frameTime * 0.001f );
-                // fix possible rounding errors
-                if( ent.health < ent.maxHealth ) {
-                    ent.health = ent.maxHealth;
-                }
-            }
-        }
     }
 
     // ch : send intermediate results
@@ -2312,25 +2201,6 @@ void GT_Shutdown()
 void GT_SpawnGametype()
 {
     //G_Print( "numCheckPoints: " + numCheckpoints + "\n" );
-
-    //TODO: fix in source, /kill should reset touch timeouts.
-    for ( int i = 0; i < numEntities; i++ )
-    {
-        Entity@ ent = G_GetEntity(i);
-        if ( ent.classname == "trigger_multiple" )
-        {
-            Entity@[] targets = ent.findTargets();
-            for ( uint j = 0; j < targets.length; j++ )
-            {
-                Entity@ target = targets[j];
-                if ( target.classname == "target_starttimer" )
-                {
-                    ent.wait = 0;
-                    break;
-                }
-            }
-        }
-    }
 
     // setup the checkpoints arrays sizes adjusted to numCheckPoints
     for ( int i = 0; i < maxClients; i++ )
